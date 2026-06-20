@@ -86,6 +86,25 @@ export default function App() {
     if (!r.ok) { setMsg(r.reason); setTimeout(() => setMsg(""), 1500); }
   };
 
+  // Keyboard shortcuts: B buy 10, S sell 10, 1-4 set volatility.
+  useEffect(() => {
+    if (screen !== "playing" || !game) return;
+    const onKey = (e: KeyboardEvent) => {
+      const s = game.market.get(selected);
+      if (e.key === "b" || e.key === "B") {
+        flash(game.portfolio.buy(selected, 10, s.price));
+      } else if (e.key === "s" || e.key === "S") {
+        const qty = Math.min(10, game.portfolio.position(selected).shares);
+        if (qty > 0) flash(game.portfolio.sell(selected, qty, s.price));
+      } else if (e.key >= "1" && e.key <= "4") {
+        game.market.setVolatility(Number(e.key) as VolLevel);
+        setFrame((f) => f + 1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [screen, game, selected]);
+
   return (
     <div className="terminal">
       <Hud

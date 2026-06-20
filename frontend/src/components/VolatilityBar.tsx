@@ -27,6 +27,7 @@ export default function VolatilityBar({ level, onChange }: Props) {
           </button>
         ))}
       </div>
+      <span className="hint">B buy · S sell · 1-4 volatility</span>
     </div>
   );
 }

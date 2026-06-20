@@ -47,6 +47,12 @@ body { margin: 0; background: var(--bg); color: var(--text); font-size: 13px; }
 .vol-btn { background: #141a26; color: var(--text); border: 1px solid transparent; border-radius: 5px;
   padding: 6px 16px; font-weight: 700; cursor: pointer; }
 .vol-btn.active { background: #3a2a10; border-color: var(--gold); color: var(--gold); }
+.hint { margin-left: auto; color: var(--muted); font-size: 10px; letter-spacing: .04em; }
+
+@keyframes flashUp { from { color: var(--pos); text-shadow: 0 0 10px rgba(38,166,154,.8); } to {} }
+@keyframes flashDown { from { color: var(--neg); text-shadow: 0 0 10px rgba(239,83,80,.8); } to {} }
+.flash-up { animation: flashUp .35s ease-out; }
+.flash-down { animation: flashDown .35s ease-out; }
 
 .error-banner { background: #5e1b1b; color: #fff; padding: 6px 14px; text-align: center; }
 
