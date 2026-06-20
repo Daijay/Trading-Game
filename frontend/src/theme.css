@@ -1,41 +1,65 @@
 :root {
-  --bg: #0e1015; --panel: #11141d; --line: #232838; --muted: #6b7280;
-  --text: #d1d4dc; --pos: #26a69a; --neg: #ef5350; --accent: #2962ff;
+  --bg: #0b0e14; --panel: #10151f; --line: #232838; --muted: #6b7280;
+  --text: #d1d4dc; --pos: #26a69a; --neg: #ef5350; --accent: #2962ff; --gold: #facc15;
   font-family: Inter, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-size: 13px; }
+.positive { color: var(--pos); } .negative { color: var(--neg); }
+.label, .cap { color: var(--muted); font-size: 10px; letter-spacing: .07em; }
 .terminal { display: flex; flex-direction: column; height: 100vh; }
-.topbar { display: flex; align-items: center; gap: 14px; padding: 10px 14px;
-  background: #161a25; border-bottom: 1px solid var(--line); }
-.symbol { color: #fff; font-size: 15px; } .muted { color: var(--muted); }
-.spacer { margin-left: auto; }
-.verdict-badge { padding: 3px 11px; border-radius: 4px; font-weight: 700; }
-.verdict-badge.positive { background: linear-gradient(90deg,#1b5e4f,#26a69a); color: #eafff7; }
-.verdict-badge.negative { background: linear-gradient(90deg,#5e1b1b,#ef5350); color: #fff; }
-.verdict-badge.neutral { background: #2a2e39; color: #d1d4dc; }
+
+.hud { display: flex; align-items: center; gap: 16px; padding: 10px 14px;
+  background: linear-gradient(90deg,#10151f,#161c2b); border-bottom: 1px solid var(--line); }
+.brand { font-weight: 800; letter-spacing: .06em; color: var(--gold); }
+.pill { background: #1e2536; padding: 3px 9px; border-radius: 4px; }
+.hud-right { margin-left: auto; display: flex; gap: 20px; }
+.hud-stat { text-align: right; } .hud-stat b { font-size: 18px; }
+.hud-stat .cap { display: block; }
+
+.picker { display: flex; gap: 6px; padding: 8px 14px; background: #0e131d;
+  border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.pick { background: #141a26; color: var(--text); border: 1px solid transparent;
+  border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+.pick.active { background: #1b2433; border-color: var(--accent); }
+
 .body { display: flex; flex: 1; min-height: 0; }
-.watchlist, .assumptions { width: 170px; background: var(--panel); padding: 10px; }
-.watchlist { border-right: 1px solid var(--line); }
-.assumptions { border-left: 1px solid var(--line); }
-.panel-title { color: var(--muted); font-size: 10px; letter-spacing: .08em; margin-bottom: 10px; }
-.wl-row { display: flex; justify-content: space-between; padding: 6px; cursor: pointer;
-  border-left: 2px solid var(--muted); }
-.wl-row.positive { border-color: var(--pos); } .wl-row.negative { border-color: var(--neg); }
-.wl-row.active { background: #1b2030; } .wl-pct.positive { color: var(--pos); }
-.wl-row.positive .wl-pct { color: var(--pos); } .wl-row.negative .wl-pct { color: var(--neg); }
-.wl-add input { width: 100%; margin-top: 8px; background: transparent; border: none;
-  color: var(--accent); padding: 6px 4px; }
 .chart { flex: 1; min-width: 0; }
-.slider-row { margin-bottom: 14px; } .slider-row label { display: block; }
-.slider-value { float: right; color: #fff; font-weight: 600; }
-.slider-row input[type=range] { width: 100%; margin-top: 6px; accent-color: var(--accent); }
-.panel-foot { color: var(--muted); font-size: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
-.breakdown { display: flex; gap: 1px; background: var(--line); border-top: 1px solid var(--line); }
-.cell { flex: 1; background: var(--panel); padding: 8px 12px; }
-.cell.blended { flex: 1.5; background: #13241e; }
-.cell-label { color: var(--muted); font-size: 9px; letter-spacing: .05em; }
-.cell-value { color: #fff; font-size: 14px; margin-top: 2px; }
-.cell.blended .cell-value { color: var(--pos); font-weight: 700; }
-.cell-value.implied { color: #facc15; } .range { color: var(--muted); font-weight: 400; }
-.error-banner { background: #5e1b1b; color: #fff; padding: 6px 14px; }
+.trade-panel { width: 210px; background: var(--panel); border-left: 1px solid var(--line); padding: 12px; }
+.trade-panel .row { display: flex; justify-content: space-between; margin-top: 6px; }
+.trade-panel .row span { color: var(--muted); }
+.qty-label { display: block; margin-top: 14px; }
+.qty-row { display: flex; gap: 5px; margin-top: 6px; }
+.qty-btn { flex: 1; background: #1b2433; color: var(--text); border: none; border-radius: 4px;
+  padding: 6px 0; cursor: pointer; }
+.qty-btn.active { background: var(--accent); color: #fff; }
+.trade-buttons { display: flex; gap: 8px; margin-top: 12px; }
+.trade-buttons button { flex: 1; border: none; border-radius: 6px; padding: 12px; font-weight: 800;
+  font-size: 15px; cursor: pointer; }
+.trade-buttons .buy { background: var(--pos); color: #062; }
+.trade-buttons .sell { background: var(--neg); color: #400; }
+.trade-buttons button:disabled { opacity: .4; cursor: not-allowed; }
+.order-est { text-align: center; color: var(--muted); font-size: 10px; margin-top: 8px; }
+
+.volbar { display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: #0e131d; border-top: 1px solid var(--line); }
+.vol-options { display: flex; gap: 6px; }
+.vol-btn { background: #141a26; color: var(--text); border: 1px solid transparent; border-radius: 5px;
+  padding: 6px 16px; font-weight: 700; cursor: pointer; }
+.vol-btn.active { background: #3a2a10; border-color: var(--gold); color: var(--gold); }
+
+.error-banner { background: #5e1b1b; color: #fff; padding: 6px 14px; text-align: center; }
+
+.screen { height: 100vh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 14px; }
+.title { color: var(--gold); letter-spacing: .08em; margin: 0; }
+.sub { color: var(--muted); margin: 0; }
+.best { color: var(--text); }
+.final { font-size: 48px; font-weight: 800; color: #fff; }
+.final-pnl { font-size: 22px; font-weight: 800; }
+.choice { text-align: center; } .choice .cap { display: block; margin-bottom: 6px; }
+.choice-row { display: flex; gap: 8px; }
+.choice-row button, .start { background: #1b2433; color: var(--text); border: 1px solid var(--line);
+  border-radius: 6px; padding: 10px 16px; cursor: pointer; }
+.choice-row button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.start { background: var(--gold); color: #1a1400; font-weight: 800; padding: 12px 40px; margin-top: 8px; }
