@@ -4,7 +4,7 @@ import type { Candle } from "../src/sim/candles";
 
 const h = vi.hoisted(() => ({
   setData: vi.fn(),
-  fitContent: vi.fn(),
+  update: vi.fn(),
   createPriceLine: vi.fn(() => ({})),
   removePriceLine: vi.fn(),
 }));
@@ -14,29 +14,37 @@ vi.mock("lightweight-charts", () => ({
   createChart: () => ({
     addCandlestickSeries: () => ({
       setData: h.setData,
+      update: h.update,
       createPriceLine: h.createPriceLine,
       removePriceLine: h.removePriceLine,
     }),
-    timeScale: () => ({ fitContent: h.fitContent }),
     remove: () => {},
   }),
 }));
 
 import CandleChart from "../src/components/CandleChart";
 
+function candle(time: number, close: number): Candle {
+  return { time, open: close, high: close, low: close, close };
+}
+
 describe("CandleChart", () => {
-  it("re-sends candle data when the in-place mutated array grows", () => {
-    const candles: Candle[] = [{ time: 0, open: 100, high: 100, low: 100, close: 100 }];
-    const { rerender } = render(<CandleChart candles={candles} avgCost={null} />);
-    expect(h.setData).toHaveBeenCalled();
-    const lastData = () => h.setData.mock.calls[h.setData.mock.calls.length - 1][0];
-    expect(lastData().length).toBe(1);
+  it("uses update() for live ticks (preserving zoom) and setData() only on stock switch", () => {
+    const a: Candle[] = [candle(0, 100)];
+    const { rerender } = render(<CandleChart candles={a} avgCost={null} />);
+    expect(h.setData).toHaveBeenCalledTimes(1);
 
-    // simulate a live tick: SAME array reference, one more candle
-    candles.push({ time: 1, open: 100, high: 102, low: 99, close: 101 });
-    rerender(<CandleChart candles={candles} avgCost={null} />);
+    // live tick: SAME array reference, one more candle -> update(), not setData()
+    a.push(candle(1, 101));
+    rerender(<CandleChart candles={a} avgCost={null} />);
+    expect(h.setData).toHaveBeenCalledTimes(1);
+    expect(h.update).toHaveBeenCalled();
+    const lastUpdate = h.update.mock.calls[h.update.mock.calls.length - 1][0];
+    expect(lastUpdate.close).toBe(101);
 
-    expect(lastData().length).toBe(2);
-    expect(h.fitContent).toHaveBeenCalled();
+    // stock switch: NEW array reference -> full setData()
+    const b: Candle[] = [candle(0, 50), candle(1, 51)];
+    rerender(<CandleChart candles={b} avgCost={null} />);
+    expect(h.setData).toHaveBeenCalledTimes(2);
   });
 });

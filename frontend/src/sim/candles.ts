@@ -6,8 +6,10 @@ export interface Candle {
   close: number;
 }
 
-export const TICKS_PER_CANDLE = 4;
-const MAX_CANDLES = 80;
+export const TICKS_PER_CANDLE = 8;
+// Keep a generous history so the chart can use incremental updates without the
+// oldest bars being dropped mid-session (which would misalign update()).
+const MAX_CANDLES = 100000;
 
 // Aggregates a stream of tick prices into OHLC candles.
 export class CandleSeries {

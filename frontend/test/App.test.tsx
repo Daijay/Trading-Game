@@ -7,6 +7,7 @@ vi.mock("lightweight-charts", () => ({
   createChart: () => ({
     addCandlestickSeries: () => ({
       setData: () => {},
+      update: () => {},
       createPriceLine: () => ({}),
       removePriceLine: () => {},
     }),

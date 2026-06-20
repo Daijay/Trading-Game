@@ -16,6 +16,8 @@ export default function CandleChart({ candles, avgCost }: Props) {
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const lineRef = useRef<IPriceLine | null>(null);
+  const prevCandles = useRef<Candle[] | null>(null);
+  const prevLen = useRef(0);
 
   // Create the chart once.
   useEffect(() => {
@@ -25,10 +27,10 @@ export default function CandleChart({ candles, avgCost }: Props) {
       grid: { vertLines: { color: "#161b27" }, horzLines: { color: "#161b27" } },
       leftPriceScale: { visible: true, borderColor: "#232838" },
       rightPriceScale: { visible: false },
-      timeScale: { visible: false, borderColor: "#232838" },
+      timeScale: { visible: false, borderColor: "#232838", barSpacing: 7, rightOffset: 6 },
       autoSize: true,
     });
-    // Put the series on the LEFT scale so the candles share the visible axis.
+    // Put the series on the LEFT scale so candles share the visible axis.
     seriesRef.current = chart.addCandlestickSeries({
       priceScaleId: "left",
       upColor: "#26a69a",
@@ -42,22 +44,33 @@ export default function CandleChart({ candles, avgCost }: Props) {
   }, []);
 
   // Sync candle data on every render. The candles array is mutated in place each
-  // tick, so its reference is stable; gating this on a [candles] dep would make
-  // the effect run only once and the chart would never update.
+  // tick (stable reference), so we cannot gate this on a [candles] dep. We use
+  // setData only when the array identity changes (a different stock); for live
+  // ticks we use update(), which preserves the user's zoom and pan.
   useEffect(() => {
     const s = seriesRef.current;
-    const chart = chartRef.current;
-    if (!s || !chart) return;
-    s.setData(
-      candles.map((c) => ({
-        time: (BASE_TIME + c.time) as UTCTimestamp,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-      })),
-    );
-    chart.timeScale().fitContent();
+    if (!s) return;
+    const toBar = (c: Candle) => ({
+      time: (BASE_TIME + c.time) as UTCTimestamp,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close,
+    });
+
+    if (prevCandles.current !== candles) {
+      s.setData(candles.map(toBar));
+      prevCandles.current = candles;
+      prevLen.current = candles.length;
+      return;
+    }
+    if (candles.length === 0) return;
+    // A new candle opened since last render: flush the just-finalized bar first.
+    if (candles.length > prevLen.current) {
+      s.update(toBar(candles[candles.length - 2]));
+    }
+    s.update(toBar(candles[candles.length - 1]));
+    prevLen.current = candles.length;
   });
 
   // Average-cost reference line, refreshed when the position entry changes.
