@@ -1,6 +1,7 @@
 import { mulberry32 } from "./rng";
-import { nextPrice, VolLevel } from "./engine";
+import { nextPrice, VolLevel, MIN_PRICE } from "./engine";
 import { CandleSeries } from "./candles";
+import { pickNews, NewsEvent } from "../game/news";
 
 export interface StockDef {
   ticker: string;
@@ -30,10 +31,12 @@ export class Market {
   level: VolLevel;
   stocks: StockState[];
   private rngs: (() => number)[];
+  private newsRng: () => number;
 
   constructor(seed: number, level: VolLevel, roster: StockDef[] = ROSTER) {
     this.level = level;
     this.rngs = roster.map((_, i) => mulberry32(seed + i * 1013));
+    this.newsRng = mulberry32(seed + 99991);
     this.stocks = roster.map((d) => ({
       ticker: d.ticker,
       drift: d.drift,
@@ -52,6 +55,20 @@ export class Market {
 
   setVolatility(level: VolLevel): void {
     this.level = level;
+  }
+
+  // Maybe emit a news event this tick; if so, apply its shock to that stock's
+  // price and reflect it in the forming candle. Returns the event or null.
+  generateNews(): NewsEvent | null {
+    const evt = pickNews(this.newsRng, this.stocks.map((s) => s.ticker), this.level);
+    if (!evt) return null;
+    const s = this.get(evt.ticker);
+    s.price = Math.max(MIN_PRICE, s.price * (1 + evt.shockPct));
+    const c = s.series.candles[s.series.candles.length - 1];
+    c.close = s.price;
+    if (s.price > c.high) c.high = s.price;
+    if (s.price < c.low) c.low = s.price;
+    return evt;
   }
 
   get(ticker: string): StockState {

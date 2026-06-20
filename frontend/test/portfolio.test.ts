@@ -36,10 +36,34 @@ describe("Portfolio", () => {
     expect(p.position("NOVA").shares).toBe(6);
   });
 
-  it("rejects selling more than held", () => {
+  it("selling more than held closes the long and opens a short", () => {
     const p = new Portfolio(1000);
-    p.buy("NOVA", 2, 100);
-    expect(p.sell("NOVA", 5, 100).ok).toBe(false);
+    p.buy("NOVA", 2, 100); // long 2 @ 100, cash 800
+    const r = p.sell("NOVA", 5, 100); // sell 2 to flat (realized 0), short 3 @ 100
+    expect(r.ok).toBe(true);
+    expect(p.position("NOVA").shares).toBe(-3);
+    expect(p.position("NOVA").avgCost).toBe(100);
+    expect(p.realized).toBe(0);
+    expect(p.cash).toBe(800 + 5 * 100);
+  });
+
+  it("shorting from flat profits when price falls, via buy to cover", () => {
+    const p = new Portfolio(1000);
+    p.sell("NOVA", 10, 100); // short 10 @ 100, cash 2000
+    expect(p.position("NOVA").shares).toBe(-10);
+    expect(p.unrealized("NOVA", 80)).toBe(200); // (80-100)*-10 = 200 gain
+    const r = p.buy("NOVA", 10, 80); // cover at 80, realize (100-80)*10 = 200
+    expect(r.ok).toBe(true);
+    expect(p.realized).toBe(200);
+    expect(p.position("NOVA").shares).toBe(0);
+    expect(p.cash).toBe(1000 + 1000 - 800);
+  });
+
+  it("net worth falls as a short position's price rises", () => {
+    const p = new Portfolio(1000);
+    p.sell("NOVA", 10, 100); // cash 2000, shares -10
+    expect(p.netWorth({ NOVA: 100 })).toBe(1000); // back to start at entry price
+    expect(p.netWorth({ NOVA: 120 })).toBe(2000 - 10 * 120); // 800
   });
 
   it("net worth equals cash plus position values", () => {
