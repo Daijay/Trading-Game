@@ -1,7 +1,0 @@
-pyproject.toml
-quant/__init__.py
-quant_valuation_backend.egg-info/PKG-INFO
-quant_valuation_backend.egg-info/SOURCES.txt
-quant_valuation_backend.egg-info/dependency_links.txt
-quant_valuation_backend.egg-info/requires.txt
-quant_valuation_backend.egg-info/top_level.txt
