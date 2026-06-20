@@ -133,7 +133,7 @@ export default function App() {
       )}
       {msg && <div className="error-banner">{msg}</div>}
       <div className="body">
-        <CandleChart candles={stock.series.candles} avgCost={pos.shares > 0 ? pos.avgCost : null} />
+        <CandleChart candles={stock.series.candles} avgCost={pos.shares !== 0 ? pos.avgCost : null} />
         <TradePanel
           ticker={selected}
           price={stock.price}
