@@ -37,4 +37,23 @@ describe("Market", () => {
     m.setVolatility(4);
     expect(m.level).toBe(4);
   });
+
+  it("never generates news at level 1", () => {
+    const m = new Market(4, 1);
+    for (let i = 0; i < 300; i++) expect(m.generateNews()).toBeNull();
+  });
+
+  it("applies a news shock to the named stock's price", () => {
+    const m = new Market(4, 4);
+    let evt = null;
+    for (let i = 0; i < 500 && !evt; i++) {
+      const before = { ...m.prices() };
+      evt = m.generateNews();
+      if (evt) {
+        const expected = before[evt.ticker] * (1 + evt.shockPct);
+        expect(m.get(evt.ticker).price).toBeCloseTo(Math.max(1, expected), 4);
+      }
+    }
+    expect(evt).not.toBeNull();
+  });
 });

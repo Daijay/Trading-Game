@@ -13,6 +13,7 @@ import VolatilityBar from "./components/VolatilityBar";
 import StartScreen from "./components/StartScreen";
 import ResultScreen from "./components/ResultScreen";
 import type { TradeResult } from "./game/portfolio";
+import type { NewsEvent } from "./game/news";
 
 type Screen = "start" | "playing" | "result";
 
@@ -30,6 +31,7 @@ export default function App() {
   const [, setFrame] = useState(0); // forces re-render each tick
   const [bestScore, setBestScore] = useState<number>(loadBestScore());
   const [msg, setMsg] = useState<string>("");
+  const [news, setNews] = useState<NewsEvent | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const start = (mode: Mode, level: VolLevel) => {
@@ -48,6 +50,11 @@ export default function App() {
     if (screen !== "playing" || !game) return;
     intervalRef.current = setInterval(() => {
       game.market.tick();
+      const evt = game.market.generateNews();
+      if (evt) {
+        setNews(evt);
+        setTimeout(() => setNews((cur) => (cur === evt ? null : cur)), 4000);
+      }
       if (game.timed) {
         game.timed.tick();
         if (game.timed.over) {
@@ -94,8 +101,7 @@ export default function App() {
       if (e.key === "b" || e.key === "B") {
         flash(game.portfolio.buy(selected, 10, s.price));
       } else if (e.key === "s" || e.key === "S") {
-        const qty = Math.min(10, game.portfolio.position(selected).shares);
-        if (qty > 0) flash(game.portfolio.sell(selected, qty, s.price));
+        flash(game.portfolio.sell(selected, 10, s.price));
       } else if (e.key >= "1" && e.key <= "4") {
         game.market.setVolatility(Number(e.key) as VolLevel);
         setFrame((f) => f + 1);
@@ -118,6 +124,12 @@ export default function App() {
         selected={selected}
         onSelect={setSelected}
       />
+      {news && (
+        <div className={`news-banner ${news.shockPct >= 0 ? "good" : "bad"}`}>
+          <b>{news.shockPct >= 0 ? "📈 NEWS" : "📉 NEWS"}</b> {news.headline}
+          <span className="news-shock">{news.shockPct >= 0 ? "+" : ""}{(news.shockPct * 100).toFixed(1)}%</span>
+        </div>
+      )}
       {msg && <div className="error-banner">{msg}</div>}
       <div className="body">
         <CandleChart candles={stock.series.candles} avgCost={pos.shares > 0 ? pos.avgCost : null} />

@@ -27,11 +27,14 @@ export default function TradePanel(p: Props) {
   const tone = p.unrealized >= 0 ? "positive" : "negative";
 
   const buy = () => { if (qty > 0) p.onBuy(qty); };
-  const sell = () => { const q = Math.min(qty, p.shares); if (q > 0) p.onSell(q); };
+  const sell = () => { if (qty > 0) p.onSell(qty); };
+  const isShort = p.shares < 0;
 
   return (
     <div className="trade-panel">
-      <div className="label">YOUR POSITION {p.ticker}</div>
+      <div className="label">
+        YOUR POSITION {p.ticker}{isShort ? <span className="short-tag">SHORT</span> : null}
+      </div>
       <div className="row"><span>Shares held</span><b>{p.shares}</b></div>
       <div className="row"><span>Avg cost</span><b>${p.avgCost.toFixed(2)}</b></div>
       <div className="row">
@@ -60,8 +63,12 @@ export default function TradePanel(p: Props) {
       </div>
 
       <div className="trade-buttons">
-        <button className="buy" disabled={maxQty < 1} onClick={buy}>BUY</button>
-        <button className="sell" disabled={p.shares < 1} onClick={sell}>SELL</button>
+        <button className="buy" disabled={maxQty < 1 && !isShort} onClick={buy}>
+          {isShort ? "BUY / COVER" : "BUY"}
+        </button>
+        <button className="sell" onClick={sell}>
+          {p.shares > 0 ? "SELL" : "SELL / SHORT"}
+        </button>
       </div>
       <div className="order-est">order {qty} @ ${p.price.toFixed(2)}</div>
     </div>
