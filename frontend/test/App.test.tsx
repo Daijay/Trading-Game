@@ -11,7 +11,7 @@ vi.mock("lightweight-charts", () => ({
       createPriceLine: () => ({}),
       removePriceLine: () => {},
     }),
-    timeScale: () => ({ fitContent: () => {} }),
+    timeScale: () => ({ fitContent: () => {}, setVisibleLogicalRange: () => {} }),
     remove: () => {},
   }),
 }));

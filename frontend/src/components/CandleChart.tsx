@@ -10,6 +10,9 @@ interface Props {
 
 // Map logical candle indices onto real timestamps so the time scale stays valid.
 const BASE_TIME = 1_700_000_000;
+// Initial zoom: show this many bar slots so the first candle sits on the left
+// with room to grow rightward (not zoomed in on one giant candle).
+const VISIBLE_BARS = 50;
 
 export default function CandleChart({ candles, avgCost }: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -62,6 +65,13 @@ export default function CandleChart({ candles, avgCost }: Props) {
       s.setData(candles.map(toBar));
       prevCandles.current = candles;
       prevLen.current = candles.length;
+      // Anchor the initial view: first candle on the left, room to the right.
+      // Set only here (not on ticks) so manual zoom/pan is never reset.
+      const chart = chartRef.current;
+      if (chart) {
+        const from = Math.max(0, candles.length - VISIBLE_BARS);
+        chart.timeScale().setVisibleLogicalRange({ from, to: from + VISIBLE_BARS });
+      }
       return;
     }
     if (candles.length === 0) return;

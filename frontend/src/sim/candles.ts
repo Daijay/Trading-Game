@@ -6,7 +6,7 @@ export interface Candle {
   close: number;
 }
 
-export const TICKS_PER_CANDLE = 8;
+export const TICKS_PER_CANDLE = 9;
 // Keep a generous history so the chart can use incremental updates without the
 // oldest bars being dropped mid-session (which would misalign update()).
 const MAX_CANDLES = 100000;
