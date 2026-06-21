@@ -10,10 +10,10 @@ export interface VolParams {
 
 // Per-tick volatility. Higher level means bigger swings and more frequent jumps.
 export const VOLATILITY: Record<VolLevel, VolParams> = {
-  1: { sigma: 0.010, jumpProb: 0.00, jumpScale: 0.00 },
-  2: { sigma: 0.025, jumpProb: 0.02, jumpScale: 0.03 },
-  3: { sigma: 0.050, jumpProb: 0.05, jumpScale: 0.06 },
-  4: { sigma: 0.110, jumpProb: 0.12, jumpScale: 0.14 },
+  1: { sigma: 0.003, jumpProb: 0.00, jumpScale: 0.00 }, // very calm drift
+  2: { sigma: 0.007, jumpProb: 0.00, jumpScale: 0.00 }, // gentle, no jumps
+  3: { sigma: 0.020, jumpProb: 0.03, jumpScale: 0.04 }, // moderate
+  4: { sigma: 0.110, jumpProb: 0.12, jumpScale: 0.14 }, // IPO-day chaos
 };
 
 export const MIN_PRICE = 1;

@@ -25,16 +25,16 @@ const NEGATIVE = [
 // Chance per tick that a news event fires, by volatility level.
 export const NEWS_PROB: Record<VolLevel, number> = {
   1: 0.00,
-  2: 0.03,
-  3: 0.07,
+  2: 0.008,
+  3: 0.04,
   4: 0.15,
 };
 
 // Base shock magnitude by level (a positive fraction).
 export const NEWS_SHOCK: Record<VolLevel, number> = {
   1: 0.00,
-  2: 0.05,
-  3: 0.10,
+  2: 0.025,
+  3: 0.07,
   4: 0.20,
 };
 
